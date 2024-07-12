@@ -9,8 +9,9 @@ class UsersController extends AppController {
         // - when submit is detected
         if ($this->request->is('post')) {
 
-            $this->request->data['User']['password'] = $this->Auth->password($this->request->data['User']['password']);
-
+            //$this->request->data['User']['password'] = $this->Auth->password($this->request->data['User']['password']);
+            
+            
             $this->User->create();
             if ($this->User->save($this->request->data)) {
                 $this->Flash->success(__('The user has been saved'));
@@ -42,6 +43,7 @@ class UsersController extends AppController {
         // - when submit is detected
 
         // Check if the user is already logged in
+        
         if ($this->Auth->loggedIn()) {
             return $this->redirect($this->Auth->redirectUrl());
         }
@@ -60,6 +62,7 @@ class UsersController extends AppController {
         }
 
     }
+
 
 
 }
