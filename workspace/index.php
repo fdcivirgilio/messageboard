@@ -1,5 +1,6 @@
 <?php
 // initialize any config files
+
 require_once "config/init.php";
 
 // $car1 = new Car("v6", 4, false, 20, 5);

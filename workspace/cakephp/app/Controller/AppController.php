@@ -34,22 +34,18 @@ class AppController extends Controller {
     // this will tell cakek to support php files for the view for rendering
     public $ext = '.php';
 
-    // include the Post Model
+    /*// include the Post Model
     public $uses = array(
         'Post'
-    );
+    );*/
 
-    // - include components
     public $components = array(
         'Flash',
         'Auth' => array(
-            // if the user is logged in
             'loginRedirect' => array(
-                'controller' => 'users',
+                'controller' => 'posts',
                 'action' => 'index'
             ),
-
-            // if teh user is not logged in AND accesses a forbidden action,
             'logoutRedirect' => array(
                 'controller' => 'pages',
                 'action' => 'display',
@@ -57,19 +53,22 @@ class AppController extends Controller {
             ),
             'authenticate' => array(
                 'Form' => array(
-                    // 'passwordHasher' => 'Blowfish',
-                    // if you want to customize the fields for logging in
-                    // 'fields'=>array('username'=>'email','password'=>'password')
+                    'passwordHasher' => 'Blowfish'
                 )
             )
         )
     );
+
+    /*public function beforeFilter() {
+        $this->Auth->allow('index', 'view');
+    }*/
+
     
     public function beforeFilter(){
         parent::beforeFilter();
         
         // global restriction
-        // $this->Auth->allow('index', 'view', 'add');
+         $this->Auth->allow('index', 'view', 'add');
         $this->set('currentUser', $this->Auth->user());
     }
 }

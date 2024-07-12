@@ -4,7 +4,7 @@ class HomeController extends AppController {
 	
 	public function beforeFilter (){
 		parent::beforeFilter();
-		echo "hello from home beforeFilter";
+		//echo "hello from home";
 
 	}
 
@@ -13,12 +13,16 @@ class HomeController extends AppController {
 		die();
 	}
 
-	public function main ($page=''){
+	/*public function main ($page=''){
 		$birthday = "OCTOBER 9, 1994";
 		$age = $this->getAge();
 		$this->set("user_name", "LESTER AG PADUL");
 		$this->set("age", $age);
 		$this->set("birthday", $birthday);
+	}*/
+
+	public function main(){
+
 	}
 
 	public function tab ($tab_item = "", $param2 = "", $param3 = "") {
@@ -33,4 +37,6 @@ class HomeController extends AppController {
 	public function getAge () {
 		return 111;
 	}
+	
+
 }

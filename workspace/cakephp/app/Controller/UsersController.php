@@ -1,70 +1,16 @@
 <?php
+
+App::uses('AppController', 'Controller');
+
 class UsersController extends AppController {
-    public $uses = ['User'];
-	public function beforeFilter() {
-        parent::beforeFilter();
 
-        // always restrict your whitelists to a per-controller basis
-        $this->Auth->allow("ajaxLogin");
-    }
+    public function add(){
 
-    public function login() {
+        // - when submit is detected
         if ($this->request->is('post')) {
-            $user = $this->User->find('first', array(
-                'conditions' => array(
-                    'username' => $this->request->data['User']['username'],
-                    'password' => $this->request->data['User']['password']
-                )
-            ));
-            
-            $didLogin = $this->Auth->login($user['User']);
-            // $didLogin = $this->Auth->login();
-            
-            if ($didLogin) {
-                return $this->redirect($this->Auth->redirectUrl());
-            }
-            
-            $this->Flash->error(__('Invalid username or password, try again'));
-        }
-    }
 
-    public function ajaxLogin () {
+            $this->request->data['User']['password'] = $this->Auth->password($this->request->data['User']['password']);
 
-        $user = $this->User->find('first', array(
-            'conditions' => array(
-                'username' => $this->request->data['username'],
-                'password' => $this->request->data['password']
-            )
-        ));
-
-        $didLogin = $this->Auth->login($user['User']);
-        
-        echo json_encode(array(
-            "status" => "success",
-            "user" => $this->Auth->user()
-        ));
-        die();
-    }
-
-    public function logout() {
-        return $this->redirect($this->Auth->logout());
-    }
-    
-    public function index() {
-        $this->User->recursive = 0;
-        $this->set('users', $this->paginate());
-    }
-
-    public function view($id = null) {
-        $this->User->id = $id;
-        if (!$this->User->exists()) {
-            throw new NotFoundException(__('Invalid user'));
-        }
-        $this->set('user', $this->User->findById($id));
-    }
-
-    public function add() {
-        if ($this->request->is('post')) {
             $this->User->create();
             if ($this->User->save($this->request->data)) {
                 $this->Flash->success(__('The user has been saved'));
@@ -74,43 +20,46 @@ class UsersController extends AppController {
                 __('The user could not be saved. Please, try again.')
             );
         }
+        
     }
 
-    public function edit($id = null) {
-        $this->User->id = $id;
-        if (!$this->User->exists()) {
-            throw new NotFoundException(__('Invalid user'));
+    public function index(){
+
+        $users = $this->paginate('User');
+        $this->set('users', $users);
+
+    }
+
+    public function view(){
+            
+        $id = $this->request->params['pass'][0];
+        $user = $this->User->findById($id);
+        $this->set('user', $user);
+    }
+
+    public function login(){
+
+        // - when submit is detected
+
+        // Check if the user is already logged in
+        if ($this->Auth->loggedIn()) {
+            return $this->redirect($this->Auth->redirectUrl());
         }
-        if ($this->request->is('post') || $this->request->is('put')) {
-            if ($this->User->save($this->request->data)) {
-                $this->Flash->success(__('The user has been saved'));
-                return $this->redirect(array('action' => 'index'));
+
+        if ($this->request->is('post')) {
+
+            if ($this->Auth->login()) {
+                return $this->redirect($this->Auth->redirectUrl());
             }
-            $this->Flash->error(
-                __('The user could not be saved. Please, try again.')
-            );
-        } else {
-            $this->request->data = $this->User->findById($id);
-            unset($this->request->data['User']['password']);
+
+            else{
+
+                $this->Flash->error(__('Invalid username or password, try again.'));
+
+            }
         }
+
     }
 
-    public function delete($id = null) {
-        // Prior to 2.5 use
-        // $this->request->onlyAllow('post');
-
-        $this->request->allowMethod('post');
-
-        $this->User->id = $id;
-        if (!$this->User->exists()) {
-            throw new NotFoundException(__('Invalid user'));
-        }
-        if ($this->User->delete()) {
-            $this->Flash->success(__('User deleted'));
-            return $this->redirect(array('action' => 'index'));
-        }
-        $this->Flash->error(__('User was not deleted'));
-        return $this->redirect(array('action' => 'index'));
-    }
 
 }

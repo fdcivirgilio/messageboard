@@ -1,38 +1,26 @@
-//app/View/Users/login.ctp
-
-<div class="users form">
-<?php echo $this->Flash->render('auth'); ?>
-<?php echo $this->Form->create('User'); ?>
-    <fieldset>
-        <legend>
-            <?php echo __('Please enter your username and password'); ?>
-        </legend>
-        <?php echo $this->Form->input('username');
-        echo $this->Form->input('password');
-    ?>
-    </fieldset>
-<?php echo $this->Form->end(__('Login')); ?>
+<div class="container py-5">
+    <div class="users form container">
+        <?php echo $this->Session->flash(); // Renders flash messages ?>
+        <?php echo $this->Form->create('User'); ?>
+            <fieldset>
+                <legend>
+                    <?php echo __('Please enter your username and password'); ?>
+                </legend>
+                <?php 
+                    echo $this->Form->input('username', [
+                        'class' => 'form-control', 
+                        'label' => 'Username', // Adding label for accessibility
+                        'required' => true // Ensuring the field is required
+                    ]);
+                    echo $this->Form->input('password', [
+                        'class' => 'form-control',
+                        'label' => 'Password', // Adding label for accessibility
+                        'required' => true // Ensuring the field is required
+                    ]);
+                ?>
+            </fieldset>
+        <div class="text-center py-3">
+            <?php echo $this->Form->end(__('Login')); // Closing the form with a submit button ?>
+        </div>
+    </div>
 </div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-    $(document).ready(function(){
-       $("input[value='Login").click(function(){
-            $.ajax({
-                url: "/cakephp/users/ajaxLogin",
-                type: "POST",
-                data: {
-                    username: $("input[name='data[User][username]']").val(),
-                    password: $("input[name='data[User][password]']").val()
-                },
-                success: function(response){
-                    var res = JSON.parse(response);
-                    if (res.status == "success") {
-                        window.location.href = "/cakephp/users/index";
-                    }
-                }
-            });
-            return false;
-       });
-    });
-</script>

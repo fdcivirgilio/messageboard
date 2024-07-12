@@ -1,0 +1,44 @@
+From DockerFile
+
+# load php 8
+FROM php:8.1-apache
+
+# install mysql extension for php
+RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
+
+# add file
+ADD ./php/apache2.conf /etc/apache2/apache2.conf
+
+# run mutex
+RUN echo "Mutex posixsem" >> /etc/apache2/apache2.conf
+
+# enable apache2 mods needed by nativecamp
+RUN a2enmod ssl
+RUN a2enmod rewrite
+
+# expose ports
+EXPOSE 443
+EXPOSE 80
+
+
+#newly added - jul 11 2024 by Gil
+
+# Install dependencies and PHP extensions
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libzip-dev \
+    && docker-php-ext-install zip mysqli pdo pdo_mysql \
+    && a2enmod rewrite
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application files
+COPY . .
+
+
+#newly added - jul 11 2024 by Gil ~ end
