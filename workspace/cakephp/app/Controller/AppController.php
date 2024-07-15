@@ -43,13 +43,12 @@ class AppController extends Controller {
         'Flash',
         'Auth' => array(
             'loginRedirect' => array(
-                'controller' => 'posts',
+                'controller' => 'users',
                 'action' => 'index'
             ),
             'logoutRedirect' => array(
-                'controller' => 'pages',
-                'action' => 'display',
-                'home'
+                'controller' => 'users',
+                'action' => 'login',
             ),
             'authenticate' => array(
                 'Form' => array(
@@ -65,10 +64,17 @@ class AppController extends Controller {
 
     
     public function beforeFilter(){
+
         parent::beforeFilter();
-        
+
         // global restriction
-         $this->Auth->allow('index', 'view', 'add');
+        $this->Auth->allow('view', 'register', 'logout', 'success');
+
         $this->set('currentUser', $this->Auth->user());
+
+        // Check if the user is already logged in and trying to access the login page
+        if ($this->request->params['action'] == 'login' && $this->Auth->user()) {
+            return $this->redirect(['controller' => 'pages', 'action' => 'index']);
+        }
     }
 }

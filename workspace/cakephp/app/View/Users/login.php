@@ -9,7 +9,8 @@
                 <?php 
                     echo $this->Form->input('username', [
                         'class' => 'form-control', 
-                        'label' => 'Username', // Adding label for accessibility
+                        'type' => 'email', // Set the input type to email
+                        'label' => 'Email Address', // Adding label for accessibility
                         'required' => true // Ensuring the field is required
                     ]);
                     echo $this->Form->input('password', [

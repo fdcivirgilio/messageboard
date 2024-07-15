@@ -35,7 +35,17 @@ class User extends AppModel {
         'username' => array(
             'required' => array(
                 'rule' => 'notBlank',
-                'message' => 'A username is required'
+                'message' => 'An email address is required'
+            ),
+
+            'length' => array(
+                'rule' => array('between', 5, 20),
+                'message' => 'Email address must be between 5 and 20 characters long.'
+            ),
+
+            'unique' => array(
+                'rule' => 'isUnique',
+                'message' => 'This email address is already taken.'
             )
         ),
         'password' => array(
@@ -44,13 +54,13 @@ class User extends AppModel {
                 'message' => 'A password is required'
             )
         ),
-        'role' => array(
+        /*'role' => array(
             'valid' => array(
                 'rule' => array('inList', array('admin', 'author')),
                 'message' => 'Please enter a valid role',
                 'allowEmpty' => false
             )
-        )
+        )*/
     );
 
     public function beforeSave($options = array()) {

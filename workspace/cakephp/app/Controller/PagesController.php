@@ -30,6 +30,8 @@ App::uses('AppController', 'Controller');
  */
 class PagesController extends AppController {
 
+	public $components = array('Session', 'Flash');
+
 /**
  * This controller does not use a model
  *
@@ -89,5 +91,18 @@ class PagesController extends AppController {
 	}
 
 	public function lazada () {
+	}
+	
+	public function success(){
+
+		// Read the flash message from the session
+		$flashMessageHTML = $this->Session->read('flashMessageHTML');
+
+		// Pass the flash message to the view
+		$this->set('flashMessageHTML', $flashMessageHTML);
+
+		// Optionally, clear the session flash message after reading it
+		$this->Session->delete('flashMessageHTML');
+		
 	}
 }
