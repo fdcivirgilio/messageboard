@@ -27,6 +27,7 @@
  */
 	//Router::connect('/', array('controller' => 'Home', 'action' => 'main', 'home'));	
 	Router::connect('/', array('controller' => 'Home', 'action' => 'main'));	
+	Router::connect('/manage-account', array('controller' => 'Users', 'action' => 'manage_account'));	
 	Router::connect('/posts', array('controller' => 'Posts', 'action' => 'index'));	
 	Router::connect('/tab_page/*', array('controller' => 'Home', 'action' => 'tab'));	
 	Router::connect('/work-experience', array('controller' => 'WorkExperience', 'action' => 'index'));

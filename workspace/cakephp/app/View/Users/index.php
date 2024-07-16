@@ -4,7 +4,6 @@
         <tr>
             <th>User ID</th>
             <th>User Name</th>
-            <th>Role</th>
             <th>Created</th>
             <th>Modified</th>
 
@@ -16,7 +15,6 @@
         <tr>
             <td><?php echo $user['User']['id']; ?></td>
             <td><?php echo $user['User']['username']; ?></td>
-            <td><?php echo $user['User']['role']; ?></td>
             <td><?php echo $user['User']['created']; ?></td>
             <td><?php echo $user['User']['modified']; ?></td>
             <td>

@@ -70,7 +70,15 @@ class AppController extends Controller {
         // global restriction
         $this->Auth->allow('view', 'register', 'logout', 'success');
 
+        $this->loadModel('User');
+
         $this->set('currentUser', $this->Auth->user());
+
+        $user_id = $this->Auth->user('id');
+
+        $userDetails = $this->User->findById($user_id);
+        
+        $this->set('currentUser_2', $userDetails);
 
         // Check if the user is already logged in and trying to access the login page
         if ($this->request->params['action'] == 'login' && $this->Auth->user()) {
