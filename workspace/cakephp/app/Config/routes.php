@@ -25,9 +25,18 @@
  * its action called 'display', and we pass a param to select the view file
  * to use (in this case, /app/View/Pages/home.ctp)...
  */
-	//Router::connect('/', array('controller' => 'Home', 'action' => 'main', 'home'));	
-	Router::connect('/', array('controller' => 'Home', 'action' => 'main'));	
+	Router::connect('/', array('controller' => 'Pages', 'action' => 'home'));	
 	Router::connect('/manage-account', array('controller' => 'Users', 'action' => 'manage_account'));	
+	Router::connect('/messages', array('controller' => 'Messagesdetails', 'action' => 'index'));	
+	Router::connect('/messages/send', array('controller' => 'Messagesitems', 'action' => 'send'));	
+	Router::connect(
+		'/messages/thread/:thread_id',
+		array('controller' => 'Messagesdetails', 'action' => 'view'),
+		array(
+			'pass' => array('thread_id'),  // Specify the named parameter
+			'thread_id' => '[a-zA-Z0-9]+', // Regex pattern for thread_id (if necessary)
+		)
+	);
 	Router::connect('/posts', array('controller' => 'Posts', 'action' => 'index'));	
 	Router::connect('/tab_page/*', array('controller' => 'Home', 'action' => 'tab'));	
 	Router::connect('/work-experience', array('controller' => 'WorkExperience', 'action' => 'index'));

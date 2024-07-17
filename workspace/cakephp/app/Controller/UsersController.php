@@ -5,7 +5,7 @@ App::uses('LogsController', 'Controller');
 
 class UsersController extends AppController {
 
-    public $components = array('Session', 'Flash');
+    //public $components = array('Session', 'Flash');
 
     public function register(){
 
@@ -377,6 +377,44 @@ class UsersController extends AppController {
         }
     
         return false; // or handle error case as needed
+    }
+
+    public function search(){
+            
+        if ($this->request->is('post')) {
+
+            $keyword = $this->request->data['User']['keyword'];
+
+            /*$users = $this->User->find('all', array(
+                'conditions' => array(
+                    'OR' => array(
+                        'User.name LIKE' => '%' . $keyword . '%',
+                    )
+                )
+            ));
+
+            return $users;*/
+
+            echo $keyword;
+
+        }
+    }
+
+    public function search_sample($keyword){
+            
+        //if ($this->request->is('post')) {
+
+            //$keyword = $this->request->data['User']['keyword'];
+
+            $users = $this->User->find('all', array(
+                'conditions' => array(
+                    'User.name LIKE' => '%' . $keyword . '%'
+                )
+            )); 
+
+            return $users;
+
+        //}
     }
 
 }

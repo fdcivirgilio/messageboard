@@ -47,6 +47,7 @@ class PagesController extends AppController {
  * @throws NotFoundException When the view file could not be found
  *   or MissingViewException in debug mode.
  */
+/*
 	public function display() {
 		$path = func_get_args();
 
@@ -79,18 +80,10 @@ class PagesController extends AppController {
 			throw new NotFoundException();
 		}
 	}
-
-	public function sample(){
-		echo "hello world!";
-		die();
-	}
+	*/
 
 	public function home () {
-		echo "home";
-		die();
-	}
-
-	public function lazada () {
+		
 	}
 	
 	public function success(){
