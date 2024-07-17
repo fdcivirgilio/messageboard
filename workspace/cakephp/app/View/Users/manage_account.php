@@ -1,5 +1,3 @@
-<?php //print_r($user); ?>
-
 <?php
 
     foreach($user as $user_details){
@@ -109,7 +107,9 @@
                         <div class="img-box text-center d-flex justify-content-center" id = "">
 
                             <img 
-                                src="https://via.placeholder.com/150" 
+                                src="
+                                    <?php echo $profile_picture; ?>
+                                " 
                                 id="profilePicturePreview" 
                                 alt="Default Profile Picture"
                                 style="height: 10vh"
@@ -213,7 +213,7 @@
         $("#UserBirthdateMonth option").filter(function() {
             return $(this).text() === birthdate['month'];
         }).prop('selected', true);
-        $("#UserBirthdateDay").val(birthdate['day']);
+        $("#UserBirthdateDay").val(padWithZero(birthdate['day']));
         $("#UserBirthdateYear").val(birthdate['year']);
         
     })
@@ -266,5 +266,4 @@
 
     
 </script>
-
 

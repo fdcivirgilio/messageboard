@@ -14,7 +14,7 @@
     ?>
 
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="..." crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="..." crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="<?php echo $this->Html->url('/js/script.js'); ?>"></script>
@@ -26,7 +26,10 @@
 
     <nav class="navbar bg-body-tertiary shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand text-dark">Message Board</a>
+            
+            <?php echo $this->Html->link('Message Board', '/', [
+                'class'=>'navbar-brand text-dark'
+            ]); ?>
 
             <div class="welcome d-flex">
                 <!-- In your view file (e.g., index.ctp) -->
@@ -59,9 +62,9 @@
         <?php echo $this->fetch('content'); ?>
     </div>
     <div class="position-fixed bottom-0 end-0 px-2 py-1 d-block badge text-light bg-secondary m-1">
-        Last login: <?php if (isset($currentUser)): ?>
-                    <?php echo $currentUser_2['User']['last_login_time']; ?>
-                <?php endif; ?>
+         <?php if (isset($currentUser)): ?>
+            Last login: <?php echo $currentUser_2['User']['last_login_time']; ?>
+        <?php endif; ?>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="..." crossorigin="anonymous"></script>
 

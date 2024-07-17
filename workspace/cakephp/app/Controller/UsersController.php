@@ -61,27 +61,36 @@ class UsersController extends AppController {
             
         $id = $this->request->params['pass'][0];
         $user = $this->User->findById($id);
+        $user_age = $this->get_user_age($id);
+        $profile_picture = $this->get_user_profile_picture($user);
         $this->set('user', $user);
+        $this->set('profile_picture', $profile_picture);
+        $this->set('user_age', $user_age);
     }
 
     public function upload_image($data){
 
-        $name = $data['name']; 
-        $full_path = $data['full_path'];
-        $type = $data['type'];
-        $tmp_name = $data['tmp_name'];
-        $size = $data['size'];
-        $error = $data['error'];
+        if(($data['error'] == 0) && ($data['size'] > 0)){
 
-        $ext = pathinfo($name, PATHINFO_EXTENSION);
-        $filename = uniqid() . '.' . $ext;
-        $filePath = WWW_ROOT . 'img' . DS . 'profile_pictures' . DS . $filename;
+            $name = $data['name']; 
+            $full_path = $data['full_path'];
+            $type = $data['type'];
+            $tmp_name = $data['tmp_name'];
+            $size = $data['size'];
+            $error = $data['error'];
 
-        if (move_uploaded_file($tmp_name, $filePath)) {
+            $ext = pathinfo($name, PATHINFO_EXTENSION);
+            $filename = uniqid() . '.' . $ext;
+            $filePath = WWW_ROOT . 'img' . DS . 'profile_pictures' . DS . $filename;
 
-            return $filename;
+            if (move_uploaded_file($tmp_name, $filePath)) {
+
+                return $filename;
+
+            }
 
         }
+        
     }
 
     public function update($user_id, $user_array) {
@@ -108,12 +117,16 @@ class UsersController extends AppController {
 
             $user_id = $this->Auth->user('id');
             $user = $this->User->findById($user_id);
+            $profile_picture = $this->get_user_profile_picture($user);
 
             if ($this->request->is(['post', 'put'])) {
 
-                $data = $this->request->data;
+                //init error count
 
-                print_r($data);
+                $image_upload_error = 0;
+                $user_update_error = 0;
+
+                $data = $this->request->data;
 
                 foreach($data as $key => $value){
 
@@ -121,31 +134,31 @@ class UsersController extends AppController {
 
                         $userInputArray = $value;
 
-                        $data['User']['profile_picture_id'] = $data['User']['profile_picture']['name'];
-
-                        echo $data['User']['profile_picture_id'];
-
-                        $this->update($user_id, $data);
-
                         foreach($userInputArray as $key => $value){
 
                             if($key == "profile_picture"){
 
-                                //print_r($value);
+                                //echo '<pre>'; print_r($value); echo '</pre>';
 
-/*
-                                if($this->upload_image($value)){
+                                $upload_image = $this->upload_image($value);
 
-                                    $this->Session->setFlash(
-                                        'Profile updated successfully. <a href="/profile/view">View Profile</a>', 
-                                        'default', 
-                                        array('class' => 'success alert alert-success')
-                                    );
+                                if(!$upload_image){
+
+                                    //$image_upload_error = 1;
+
                                 }
 
-*/
+                                else{
+                                    $data['User']['profile_picture_id'] = $upload_image;
+                                }
 
                             }
+
+                        }
+
+                        if(!$this->update($user_id, $data)){
+
+                            $user_update_error = 1;
 
                         }
 
@@ -153,14 +166,61 @@ class UsersController extends AppController {
                     }
                 }
 
+                if( $image_upload_error == 1 || $user_update_error == 1 ){
 
+                    if ( $image_upload_error == 1 ){
+                        $error_message = '<br>Profile picture upload failed.</br>';
+                    }
 
+                    else if ( $user_update_error == 1 ){
+                        $error_message = '<br>Profile details update failed.</br>';
+                    
+                    }
+
+                    $this->Session->setFlash(
+                        'Something went wrong. Please see the following errors: ' . $error_message, 
+                        'default', 
+                        array('class' => 'error alert alert-danger')
+                    );
+                        
+                        
+                }
+
+                else{
+
+                    $this->Session->setFlash(
+                        '
+                            <div class = "text-center">
+                                Profile updated successfully. 
+                                <div>
+                                    <a 
+                                        href="' . Router::url(array('controller' => 'users', 'action' => 'view', $user_id)) . '"
+                                        class = "btn btn-success mt-2"
+                                    >
+                                        View Your Profile
+                                    </a>
+                                </div>
+                            </div>
+                        ',
+                        'default',
+                        array('class' => 'success alert alert-success')
+                    );
+                    
+                       
+                }
+
+                //updates the user details
+
+                $user = $this->User->findById($user_id);
 
             }
 
             $this->set('user_details', $user);
 
-           $this->set('user', $user);
+            $this->set('user', $user);
+
+            $this->set('profile_picture', $profile_picture);
+
         }
     }
 
@@ -176,7 +236,7 @@ class UsersController extends AppController {
         }
 
         if ($this->request->is('post')) {
-
+            
             if ($this->Auth->login()) {
 
                 $user_id = $this->Auth->user('id');
@@ -245,7 +305,7 @@ class UsersController extends AppController {
     
         return false;
     }
-
+/*
     public function manageAccount() {
         
         $user = $this->Users->get($this->Auth->user('id'));
@@ -278,10 +338,45 @@ class UsersController extends AppController {
                 $this->Flash->success(__('Profile updated successfully.'));
             } else {
                 $this->Flash->error(__('Unable to update profile.'));
-            }*/
+            }
         }
 
         $this->set('user_details', $user);
+    }
+*/
+    public function get_user_profile_picture($user_array) {
+
+        if ($user_array) {
+
+            if($user_array['User']['profile_picture_id'] == null){
+
+                return 'https://via.placeholder.com/150';
+
+            } else {
+
+                $relativePath = 'img/profile_pictures/' . $user_array['User']['profile_picture_id'];
+
+                return Router::url('/' . $relativePath, true);
+            }
+    
+        }
+
+        return 'https://via.placeholder.com/150';
+
+    }
+
+    public function get_user_age($user_id) {
+        $user = $this->User->findById($user_id);
+    
+        if ($user && isset($user['User']['birthdate'])) {
+            $birthdate = new DateTime($user['User']['birthdate']);
+            $today = new DateTime();
+            $age = $birthdate->diff($today)->y;
+    
+            return $age;
+        }
+    
+        return false; // or handle error case as needed
     }
 
 }
