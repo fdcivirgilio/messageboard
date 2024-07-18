@@ -32,5 +32,21 @@ App::uses('Model', 'Model');
 class Messagesdetail extends AppModel {
     public $useTable = 'messages_details';
     public $primaryKey = 'id';
-    
+
+    public function getMessagesByUserId($userId) {
+
+        $conditions = array(
+            'OR' => array(
+                'Message.created_by_user_id' => $userId,
+                'Message.recipient_user_id' => $userId
+            )
+        );
+
+        return $this->find('all', array(
+            'conditions' => $conditions
+        ));
+    }
+
+
+            
 }

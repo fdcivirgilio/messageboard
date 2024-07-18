@@ -61,8 +61,8 @@ class UsersController extends AppController {
             
         $id = $this->request->params['pass'][0];
         $user = $this->User->findById($id);
-        $user_age = $this->get_user_age($id);
-        $profile_picture = $this->get_user_profile_picture($user);
+        $user_age = $this->User->get_user_age($id);
+        $profile_picture = $this->User->get_user_profile_picture($user);
         $this->set('user', $user);
         $this->set('profile_picture', $profile_picture);
         $this->set('user_age', $user_age);
@@ -117,7 +117,7 @@ class UsersController extends AppController {
 
             $user_id = $this->Auth->user('id');
             $user = $this->User->findById($user_id);
-            $profile_picture = $this->get_user_profile_picture($user);
+            $profile_picture = $this->User->get_user_profile_picture($user);
 
             if ($this->request->is(['post', 'put'])) {
 
@@ -241,7 +241,7 @@ class UsersController extends AppController {
 
                 $user_id = $this->Auth->user('id');
 
-                $this->update_last_login_time($user_id);
+                $this->User->update_last_login_time($user_id);
 
                 //add data to logs
 
@@ -250,7 +250,7 @@ class UsersController extends AppController {
     
                 //$this->Flash->success(__($user_id));
 
-                //return $this->redirect($this->Auth->redirectUrl());
+                return $this->redirect($this->Auth->redirectUrl());
             }
 
             else{
@@ -294,127 +294,62 @@ class UsersController extends AppController {
         //$this->render('index'); // or whatever your default view is
     }
 
-    public function update_last_login_time($user_id) {
+    public function search($keyword){
+            
+        $users = $this->User->find('all', array(
+            'conditions' => array(
+                'User.name LIKE' => '%' . $keyword . '%',
+                'User.username LIKE' => '%' . $keyword . '%',
+            )
+        ));
 
-        $this->User->id = $user_id;
-    
-        if ($this->User->saveField('last_login_time', date('Y-m-d H:i:s'))) {
-            // Find and return the updated user data
-            return $this->User->findById($user_id);
-        }
-    
-        return false;
+        return $users;
+
     }
-/*
-    public function manageAccount() {
+
+    public function search_html_result($users_array){
+
+        if($users_array){
+
+            $html = "";
+
+            foreach($users_array as $user){
+
+                $user_id = $user['User']['id'];
+                $user_name = $user['User']['name'];
+                $user_username = $user['User']['username'];
+                $user_profile_picture = $this->User->get_user_profile_picture($user);
+    
+                $html .= '
+                    <div class="result-item mb-2">
+                        <div 
+                            class = "result-item-click-area d-flex text-light text-decoration-none btn"
+                            onclick = "selectRecipient(' . $user_id . ', \'' . $user_name . '\', \'' . $user_username . '\')"
+                        >
+    
+                            <div class="search-result-image border" style = "width: 30px">
+                                <img src="' . $user_profile_picture . '" alt="' . $user_name . '" class = "w-100">
+                            </div>
+    
+                            <div class="search-result-details ms-1">
+                                <span class = "">' . $user_name . '</span> - 
+                                <span>' . $user_username . '</span>
+                            </div>
+                        </div>
+                    </div>
+                ';
+    
+            }
+    
+            return '<div class="search-result p-2 px-4 bg-secondary rounded overflow-hidden">' . $html . '</div>';
+
+        }
         
-        $user = $this->Users->get($this->Auth->user('id'));
-
-        if ($this->request->is(['post', 'put'])) {
-
-            $data = $this->request->getData();
-
-            // Handle file upload
-            if (!empty($data['profile_picture']['tmp_name'])) {
-                $file = $data['profile_picture'];
-                $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-                $filename = uniqid() . '.' . $ext;
-                $filePath = WWW_ROOT . 'img' . DS . 'profile_pictures' . DS . $filename;
-
-                if (move_uploaded_file($file['tmp_name'], $filePath)) {
-                    $data['profile_picture'] = 'img/profile_pictures/' . $filename;
-                } else {
-                    $this->Flash->error(__('Unable to upload profile picture.'));
-                }
-            } else {
-                unset($data['profile_picture']);
-            }
-
-            $user = $this->Users->patchEntity($user, $data);
-
-            print_r($user);
-
-            /*if ($this->Users->save($user)) {
-                $this->Flash->success(__('Profile updated successfully.'));
-            } else {
-                $this->Flash->error(__('Unable to update profile.'));
-            }
+        else{
+                
+            return '<div class="search-result-no-result text-center text-light p-2 px-4 bg-secondary rounded overflow-hidden">No users found.</div>';
         }
 
-        $this->set('user_details', $user);
-    }
-*/
-    public function get_user_profile_picture($user_array) {
-
-        if ($user_array) {
-
-            if($user_array['User']['profile_picture_id'] == null){
-
-                return 'https://via.placeholder.com/150';
-
-            } else {
-
-                $relativePath = 'img/profile_pictures/' . $user_array['User']['profile_picture_id'];
-
-                return Router::url('/' . $relativePath, true);
-            }
-    
-        }
-
-        return 'https://via.placeholder.com/150';
-
-    }
-
-    public function get_user_age($user_id) {
-        $user = $this->User->findById($user_id);
-    
-        if ($user && isset($user['User']['birthdate'])) {
-            $birthdate = new DateTime($user['User']['birthdate']);
-            $today = new DateTime();
-            $age = $birthdate->diff($today)->y;
-    
-            return $age;
-        }
-    
-        return false; // or handle error case as needed
-    }
-
-    public function search(){
-            
-        if ($this->request->is('post')) {
-
-            $keyword = $this->request->data['User']['keyword'];
-
-            /*$users = $this->User->find('all', array(
-                'conditions' => array(
-                    'OR' => array(
-                        'User.name LIKE' => '%' . $keyword . '%',
-                    )
-                )
-            ));
-
-            return $users;*/
-
-            echo $keyword;
-
-        }
-    }
-
-    public function search_sample($keyword){
-            
-        //if ($this->request->is('post')) {
-
-            //$keyword = $this->request->data['User']['keyword'];
-
-            $users = $this->User->find('all', array(
-                'conditions' => array(
-                    'User.name LIKE' => '%' . $keyword . '%'
-                )
-            )); 
-
-            return $users;
-
-        //}
     }
 
 }

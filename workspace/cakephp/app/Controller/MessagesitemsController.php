@@ -20,7 +20,7 @@ class MessagesItemsController extends AppController {
 
 		return $data = array(
 			'Messagesdetail' => array(
-				'recipient_user_id' => $messagesitemsInput['Messagesitem']['to'],
+				'recipient_user_id' => $messagesitemsInput['Messagesitem']['recipient_user_id'],
 				'thread_id' => $messagesitemsInput['Messagesitem']['thread_id'],
 				'created_by_user_id' => $messagesitemsInput['Messagesitem']['created_by_user_id']
 			)
@@ -29,13 +29,25 @@ class MessagesItemsController extends AppController {
 
     public function search(){
 
-		if ($this->request->is('post')) {
+		$this->autoRender = false;
 
-            $keyword = $this->request->data['User']['keyword'];
+        if ($this->request->is('ajax')) {
 
-			echo $keyword;
-		}
+			$keyword = $this->request->data['User']['keyword'];
 
+			$usersController = new UsersController();
+
+            $results = $usersController->User->search($keyword);
+
+			$results_html = $usersController->User->search_html_result($results);
+            
+            $response = array(
+                'status' => 'success',
+                'html' => $results_html
+            );
+
+			echo json_encode($response);
+        }
 
 	}
 
@@ -43,61 +55,111 @@ class MessagesItemsController extends AppController {
 
 		//creating a new conversation
 
-		// - when submit is detected
-
-		//search()
-
-		$usersController = new UsersController();
-		//$usersController->search_sample('gil');
-
-		//debug($this->set('search_sample', $usersController->search_sample('gil')));
-
         if ($this->request->is('post')) {
 
+			$usersController = new UsersController();
+
 			$messageitems = $this->request->data;
-			$user_id = $this->Auth->user('id');
-			$messageitems['Messagesitem']['thread_id'] = uniqid();
-			$messageitems['Messagesitem']['user_id'] = $user_id;
-			$messageitems['Messagesitem']['created_by_user_id'] = $messageitems['Messagesitem']['to'];
 
-			$messagesItemsController = new MessagesdetailsController();
-        	$messagesItemsController->create($this->create_array_for_messagesdetails($messageitems));
+			if($messageitems['Messagesitem']['to'] == null || !isset($messageitems['Messagesitem']['to'])){
 
-            $this->Messagesitem->create();
-            
-            if ($this->Messagesitem->save($messageitems)) {
-
-                $this->Session->write(
-                    'flashMessageHTML', 
-                    '
-                        <div class="alert alert-success text-center py-4">
-                            Message sent.
-                        </div>
-                    '
-                );
-
-				/*$redirectUrl = Router::url(array(
-					'controller' => 'Messagesdetails',
-					'action' => 'view',
-					'thread_id' => $messageitems['Messagesitem']['thread_id']
-				));*/
-
-				//the comment redirect url is not working - it creates a duplicate base url
-
-				$redirectUrl = Router::url('/messages/thread/' . $messageitems['Messagesitem']['thread_id'] . '/', true);			
-
-                $this->redirect($redirectUrl);
-            }
-
-            else {
-                 
 				$this->Session->setFlash(
-					'Something went wrong. Please try again.',
+					'Please select a recipient.',
 					'default', 
 					array('class' => 'error alert alert-danger')
 				);
+	
+				return;
+			}
+
+			else{
+
+				if(isset($messageitems['Messagesitem'])){
+
+					if($messageitems['Messagesitem']['to'] == $this->Auth->user('id')){
+	
+						$this->Session->setFlash(
+							'You cannot send a message to yourself.',
+							'default', 
+							array('class' => 'error alert alert-danger')
+						);
+	
+						return;
+					}
+	
+					if($usersController->User->userExists(($messageitems['Messagesitem']['to'])) != true){
+	
+						$this->Session->setFlash(
+							'The user does not exist.',
+							'default', 
+							array('class' => 'error alert alert-danger')
+						);
+	
+						return;
+					}
+	
+					if($messageitems['Messagesitem']['content'] == null){
+	
+						$this->Session->setFlash(
+							'Please enter a message.',
+							'default', 
+							array('class' => 'error alert alert-danger')
+						);
+	
+						return;
+					}
+	
+					$user_id = $this->Auth->user('id');
+					$messageitems['Messagesitem']['thread_id'] = uniqid();
+					$messageitems['Messagesitem']['user_id'] = $user_id;
+					$messageitems['Messagesitem']['recipient_user_id'] = $messageitems['Messagesitem']['to'];
+					$messageitems['Messagesitem']['created_by_user_id'] = $user_id;
+	
+					$messagesItemsController = new MessagesdetailsController();
+					$messagesItemsController->create($this->create_array_for_messagesdetails($messageitems));
+	
+					$this->Messagesitem->create();
 					
-            }
+					if ($this->Messagesitem->save($messageitems)) {
+	
+						$this->Session->write(
+							'flashMessageHTML', 
+							'
+								<div class="alert alert-success text-center py-4">
+									Message sent.
+								</div>
+							'
+						);
+						
+						$redirectUrl = Router::url('/messages/thread/' . $messageitems['Messagesitem']['thread_id'] . '/', true);	
+						
+						$this->Session->setFlash(
+							'
+								<div class = "text-center">
+									Message sent!
+								</div>
+							',
+							'default',
+							array('class' => 'success alert alert-success')
+						);
+	
+						$this->redirect($redirectUrl);
+					}
+	
+					else {
+						
+						$this->Session->setFlash(
+							'Something went wrong. Please try again.',
+							'default', 
+							array('class' => 'error alert alert-danger')
+						);
+							
+					}
+	
+				}
+
+			}
+			
         }
 
 	}

@@ -31,6 +31,8 @@ App::uses('BlowfishPasswordHasher', 'Controller/Component/Auth');
  */
 class User extends AppModel {
 
+
+
     public $validate = array(
         'username' => array(
             'required' => array(
@@ -72,6 +74,127 @@ class User extends AppModel {
         }
         return true;
     }
+
+    public function userExists($userId) {
+        if($this->exists($userId)){
+            return true;
+        }
+        
+    }
+
+    public function get_profile_picture_url_by_image_name($image_name){
+
+        if(strlen($image_name) > 2){
+
+            $relativePath = 'img/profile_pictures/' . $image_name;
+
+            return Router::url('/' . $relativePath, true);
+
+        }
+
+        return 'https://via.placeholder.com/150';
+
+    }
+
+    public function get_user_profile_picture($user_array) {
+
+        $image_name = '';
+
+        if ($user_array) {
+
+            $image_name = $user_array['User']['profile_picture_id'];
+                
+        }
+
+        return $this->get_profile_picture_url_by_image_name($image_name);
+
+    }
+
+    public function update_last_login_time($user_id) {
+
+        $this->User->id = $user_id;
+    
+        if ($this->User->saveField('last_login_time', date('Y-m-d H:i:s'))) {
+            // Find and return the updated user data
+            return $this->User->findById($user_id);
+        }
+    
+        return false;
+    }
+
+    public function get_user_age($user_id) {
+
+        $user = $this->User->findById($user_id);
+    
+        if ($user && isset($user['User']['birthdate'])) {
+            $birthdate = new DateTime($user['User']['birthdate']);
+            $today = new DateTime();
+            $age = $birthdate->diff($today)->y;
+    
+            return $age;
+        }
+    
+        return false;
+    }
+
+    public function search($keyword){
+            
+        $users = $this->find('all', array(
+            'conditions' => array(
+                'User.name LIKE' => '%' . $keyword . '%',
+                'User.username LIKE' => '%' . $keyword . '%',
+            )
+        ));
+
+        return $users;
+
+    }
+
+    public function search_html_result($users_array){
+
+        if($users_array){
+
+            $html = "";
+
+            foreach($users_array as $user){
+
+                $user_id = $user['User']['id'];
+                $user_name = $user['User']['name'];
+                $user_username = $user['User']['username'];
+                $user_profile_picture = $this->get_user_profile_picture($user);
+    
+                $html .= '
+                    <div class="result-item mb-2">
+                        <div 
+                            class = "result-item-click-area d-flex text-light text-decoration-none btn"
+                            onclick = "selectRecipient(' . $user_id . ', \'' . $user_name . '\', \'' . $user_username . '\')"
+                        >
+    
+                            <div class="search-result-image border" style = "width: 30px">
+                                <img src="' . $user_profile_picture . '" alt="' . $user_name . '" class = "w-100">
+                            </div>
+    
+                            <div class="search-result-details ms-1">
+                                <span class = "">' . $user_name . '</span> - 
+                                <span>' . $user_username . '</span>
+                            </div>
+                        </div>
+                    </div>
+                ';
+    
+            }
+    
+            return '<div class="search-result p-2 px-4 bg-secondary rounded overflow-hidden">' . $html . '</div>';
+
+        }
+        
+        else{
+                
+            return '<div class="search-result-no-result text-center text-light p-2 px-4 bg-secondary rounded overflow-hidden">No users found.</div>';
+        }
+
+    }
+
     
 
 }
