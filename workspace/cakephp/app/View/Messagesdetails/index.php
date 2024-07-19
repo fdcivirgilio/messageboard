@@ -27,8 +27,6 @@
 
     <div class="message-list">
         <?php
-            //debug($messagesdetails);
-
 
             if(isset($messagesdetails)){
 
@@ -36,10 +34,11 @@
 
                     ?>
                         <a 
-                            class = "d-block container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary" 
+                            class = "d-block container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary position-relative" 
                             style = "height: 100px"
                             href = "<?php echo Router::url('/messages/thread/' . $message['Messagesdetail']['thread_id'] . '/', true);	?>"
                         >
+    
 
                             <div class="profile-picture col-1 overflow-hidden bg-light text-center">
 
@@ -77,16 +76,23 @@
     
 </div>
 
-<div id="loadMoreBtnContainer" class="text-center mt-3">
-    <button id="loadMoreBtn" class="btn btn-primary">Show More</button>
+<div id="loadMoreBtnContainer" class="text-center pb-4 pt-0">
+    <button id="loadMoreBtn" class="btn btn-secondary">Show More</button>
+</div>
+
+<div class="the-end d-none pb-4 pt-0">
+    <p class="text-center text-secondary">All messages have been loaded.</p>
 </div>
 
 <script>
 
-    function html_item(created, sender_name, recipient_name, recipient_username, recipient_profile_picture, thread_id){
+    var url_prefix_for_show_more_messages = "<?php echo Router::url('/messages/thread/', true); ?>";
+    var page_count = 2;
+
+    function html_item(created, sender_name, recipient_name, recipient_username, recipient_profile_picture, thread_id, url_prefix_for_show_more_messages){
         return `
 
-            <a class="d-block container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary" style="height: 100px" href="http://localhost/cakephp/messages/thread/`+ thread_id +`/">
+            <a class="d-block container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary" style="height: 100px" href="`+ url_prefix_for_show_more_messages + thread_id +`/">
 
                 <div class="profile-picture col-1 overflow-hidden bg-light text-center">
 
@@ -114,56 +120,39 @@
 
         `; 
     }
- $(document).ready(function() {
-    $('#loadMoreBtn').on('click', function() {
-        $.ajax({
-            type: 'GET',
-            url: '<?php echo Router::url(array('controller' => 'messagesdetails', 'action' => 'index')); ?>',
-            dataType: 'json', // Expect JSON response from server
-            success: function(response) {
+    $(document).ready(function() {
+        $('#loadMoreBtn').on('click', function() {
+            $.ajax({
+                type: 'GET',
+                url: '<?php echo Router::url(array('controller' => 'messagesdetails', 'action' => 'index')); ?>?page=' + page_count,
+                dataType: 'json', // Expect JSON response from server
+                success: function(response) {
 
-                //console.log(response)
+                    for(var count = 0; count < response.length; count++){
 
-                
-                //alert(response.length)
+                        let created = response[count]['Messagesdetail']['created'];
+                        let thread_id = response[count]['Messagesdetail']['thread_id'];
+                        let sender_name = response[count]['User']['sender_name'];
+                        let recipient_name = response[count]['Recipient']['recipient_name'];
+                        let recipient_username = response[count]['Recipient']['recipient_username'];
+                        let recipient_profile_picture = response[count]['Recipient']['recipient_profile_picture'];
 
-                for(var count = 0; count < response.length; count++){
+                        $('.message-list').append(html_item(created, sender_name, recipient_name, recipient_username, recipient_profile_picture, thread_id, url_prefix_for_show_more_messages));
 
-                    let created = response[count]['Messagesdetail']['created'];
-                    let thread_id = response[count]['Messagesdetail']['thread_id'];
-                    let sender_name = response[count]['User']['sender_name'];
-                    let recipient_name = response[count]['Recipient']['recipient_name'];
-                    let recipient_username = response[count]['Recipient']['recipient_username'];
-                    let recipient_profile_picture = response[count]['Recipient']['recipient_profile_picture'];
+                    }
 
-                    $('.message-list').append(html_item(created, sender_name, recipient_name, recipient_username, recipient_profile_picture, thread_id));
+                    page_count++;
 
-                    //console.log(recipient_profile_picture)
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching data:', error); // Log any errors to console
 
+                    if(error == 'Not Found'){
+                        $('#loadMoreBtnContainer').hide();
+                        $('.the-end').removeClass('d-none');
+                    }
                 }
-
-                    
-
-                
-                // Handle JSON response data here
-                //console.log(response); // Log the JSON response to console for debugging
-
-                // Assuming dataArray is defined above
-                /*$.each(response, function(index, item) {
-                    var messagesdetail = item.Messagesdetail;
-                    var user = item.User;
-                    var recipient = item.Recipient;
-
-                    // Append HTML to messageListContainer
-                    $('.message-list').append(recipient);
-                    
-                
-                });*/
-            },
-            error: function(xhr, status, error) {
-                console.error('Error fetching data:', error); // Log any errors to console
-            }
+            });
         });
     });
-});
 </script>

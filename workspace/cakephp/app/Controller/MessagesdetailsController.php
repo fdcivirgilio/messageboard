@@ -77,12 +77,16 @@ class MessagesdetailsController extends AppController {
 
 	public function index() {
 		if ($this->Auth->user()) {
+			
 			$userId = $this->Auth->user('id');
 	
 			// Check if it's an AJAX request
 			if ($this->request->is('ajax')) {
 				$this->layout = 'ajax'; // Use a separate layout for AJAX responses
-	
+
+				// Get the page number from the request, default to 1 if not provided
+				$page = $this->request->query('page') ? $this->request->query('page') : 1;
+
 				// Adjust the pagination settings for AJAX response
 				$this->paginate = array(
 					'conditions' => array(
@@ -117,7 +121,7 @@ class MessagesdetailsController extends AppController {
 						'Recipient.profile_picture_id AS recipient_profile_picture'
 					),
 					'limit' => 10,
-					'page' => 1 // Start from the first page for AJAX response
+					'page' => $page // Start from the first page for AJAX response
 				);
 	
 				// Paginate the Messagesdetail model

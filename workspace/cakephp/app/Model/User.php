@@ -124,7 +124,7 @@ class User extends AppModel {
 
     public function get_user_age($user_id) {
 
-        $user = $this->User->findById($user_id);
+        $user = $this->findById($user_id);
     
         if ($user && isset($user['User']['birthdate'])) {
             $birthdate = new DateTime($user['User']['birthdate']);

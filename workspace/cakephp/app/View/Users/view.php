@@ -49,11 +49,11 @@
 
                     <div class="col-4 order-1 p-4 h-100">
 
-                        <div class="img-box h-100 d-flex align-items-center shadow-sm">
+                        <div class="img-box h-100 d-flex align-items-center justify-content-center shadow-sm">
 
                             <img 
                                 src = "<?php echo $profile_picture; ?>"
-                                class = "w-100 d-block"
+                                class = "h-100 d-block"
                             />
                             
                         </div>
