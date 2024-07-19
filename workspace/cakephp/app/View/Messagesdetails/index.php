@@ -50,7 +50,7 @@
 
                                 <div class="message-item">
 
-                                    latest message should appear here.
+                                    <?php echo $message['MessageItem']['latest_message']; ?>
 
                                 </div>
 
@@ -145,7 +145,6 @@
 
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error fetching data:', error); // Log any errors to console
 
                     if(error == 'Not Found'){
                         $('#loadMoreBtnContainer').hide();

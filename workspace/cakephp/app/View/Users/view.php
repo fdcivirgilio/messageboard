@@ -13,7 +13,7 @@
 
                 <h1 class = "fw-bold text-center">User Profile</h1>
 
-                <div class="d-flex" style = "height: 30vh">
+                <div class="d-flex" style = "height: 300px">
 
                     <div class = "col-8 order-2 ps-0 p-4">
                         <div class = "">

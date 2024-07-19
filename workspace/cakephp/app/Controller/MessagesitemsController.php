@@ -164,5 +164,35 @@ class MessagesItemsController extends AppController {
 
 	}
 
+	public function reply(){
+
+		//reply to an existing conversation
+
+        if ($this->request->is('post')) {
+
+			$this->autoRender = false;
+
+			//$usersController = new UsersController();
+
+			$messageitems = $this->request->data;
+
+			$user_id = $this->Auth->user()['id'];
+
+			$messageitems['Messagesitem']['user_id'] = $user_id;
+
+			$this->Messagesitem->create();
+			
+			if ($this->Messagesitem->save($messageitems)) {
+
+				echo json_encode($this->Messagesitem->save($messageitems));
+				
+			}
+
+			
+        }
+
+	}
+
+
 }
 

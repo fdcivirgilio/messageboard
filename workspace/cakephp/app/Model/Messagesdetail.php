@@ -33,20 +33,45 @@ class Messagesdetail extends AppModel {
     public $useTable = 'messages_details';
     public $primaryKey = 'id';
 
-    public function getMessagesByUserId($userId) {
+    public function getMessagesdetailsByThreadId($thread_id) {
 
         $conditions = array(
-            'OR' => array(
-                'Message.created_by_user_id' => $userId,
-                'Message.recipient_user_id' => $userId
-            )
+            'thread_id' => $thread_id,
         );
 
-        return $this->find('all', array(
-            'conditions' => $conditions
-        ));
+        return $this->find('all', 
+        
+            array(
+                'conditions' => $conditions,
+                'joins' => array(
+                    array(
+                        'table' => 'users', // Assuming the table name is 'users'
+                        'alias' => 'User',
+                        'type' => 'INNER',
+                        'conditions' => array(
+                            'Messagesdetail.created_by_user_id = User.id'
+                        )
+                    ),
+                    array(
+                        'table' => 'users',
+                        'alias' => 'Recipient',
+                        'type' => 'INNER',
+                        'conditions' => array(
+                            'Messagesdetail.recipient_user_id = Recipient.id'
+                        )
+                    )
+                ),
+                'fields' => array(
+                    'Messagesdetail.*',
+                    'User.name AS sender_name',
+                    'Recipient.username AS recipient_username',
+                    'Recipient.name AS recipient_name',
+                    'Recipient.profile_picture_id AS recipient_profile_picture'
+                ),
+                'limit' => 10,
+                'order' => 'Messagesdetail.created DESC' // Example ordering, adjust as needed
+            )
+        );
     }
-
-
             
 }

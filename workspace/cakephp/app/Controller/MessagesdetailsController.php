@@ -2,78 +2,11 @@
 
 App::uses('AppController', 'Controller');
 
+App::uses('MessagesitemsController', 'Controller');
+
 class MessagesdetailsController extends AppController {
 
 	public $uses = array('Messagesdetail', 'User');
-
-	/*public function index() {
-
-		if ($this->Auth->user()) {
-
-			$userId = $this->Auth->user('id');
-
-			// Check if it's an AJAX request
-			if ($this->request->is('ajax')) {
-				$this->layout = 'ajax'; // Use a separate layout for AJAX responses
-			}
-	
-
-			$this->paginate = array(
-				'conditions' => array(
-					'OR' => array(
-						'Messagesdetail.created_by_user_id' => $userId,
-						'Messagesdetail.recipient_user_id' => $userId
-					)
-				),
-				'joins' => array(
-					array(
-						'table' => 'users', // Assuming the table name is 'another_models'
-						'alias' => 'User',
-						'type' => 'INNER',
-						'conditions' => array(
-							'Messagesdetail.created_by_user_id = User.id'
-						)
-					),
-					array(
-						'table' => 'users',
-						'alias' => 'Recipient',
-						'type' => 'INNER',
-						'conditions' => array(
-							'Messagesdetail.recipient_user_id = Recipient.id'
-						)
-					)
-			
-				),
-				'fields' => array(
-					'Messagesdetail.*',
-					//'User.username AS sender_username',
-					'User.name AS sender_name',
-					'Recipient.username AS recipient_username',
-					'Recipient.name AS recipient_name',
-					'Recipient.profile_picture_id AS recipient_profile_picture'
-
-				),
-				
-				'limit' => 10,
-			);
-	
-			// Paginate the Messagesdetail model
-			$messagesdetails = $this->paginate('Messagesdetail');
-
-			// If it's an AJAX request, return only the message items
-			if ($this->request->is('ajax')) {
-				$response = array('message' => 'test'); // Create an array with the data to encode
-				echo json_encode($response); // Encode the array as JSON and echo it
-				$this->autoRender = false; // Disable CakePHP rendering to avoid additional output
-			}
-	
-			// For regular page request, set the messagesdetails for the full view
-			$this->set('messagesdetails', $messagesdetails);
-
-
-		}
-
-    }*/
 
 	public function index() {
 		if ($this->Auth->user()) {
@@ -82,6 +15,7 @@ class MessagesdetailsController extends AppController {
 	
 			// Check if it's an AJAX request
 			if ($this->request->is('ajax')) {
+
 				$this->layout = 'ajax'; // Use a separate layout for AJAX responses
 
 				// Get the page number from the request, default to 1 if not provided
@@ -155,6 +89,15 @@ class MessagesdetailsController extends AppController {
 							'conditions' => array(
 								'Messagesdetail.recipient_user_id = Recipient.id'
 							)
+							),
+						array(
+							'table' => 'messages_items',
+							'alias' => 'MessageItem',
+							'type' => 'LEFT',
+							'conditions' => array(
+								'MessageItem.thread_id = Messagesdetail.thread_id'
+							),
+							'order' => array('MessageItem.created DESC') // Get the latest message
 						)
 					),
 					'fields' => array(
@@ -162,7 +105,8 @@ class MessagesdetailsController extends AppController {
 						'User.name AS sender_name',
 						'Recipient.username AS recipient_username',
 						'Recipient.name AS recipient_name',
-						'Recipient.profile_picture_id AS recipient_profile_picture'
+						'Recipient.profile_picture_id AS recipient_profile_picture',
+						'MessageItem.content AS latest_message' // Get the latest message content
 					),
 					'limit' => 10,
 					'order' => 'Messagesdetail.created DESC' // Example ordering, adjust as needed
@@ -187,15 +131,61 @@ class MessagesdetailsController extends AppController {
 
 	}
 
-	public function view($thread_id){
+	/*public function view($thread_id){
 
-		$messagesdetails = $this->Messagesdetail->find('all', array(
-			'conditions' => array(
-				'Messagesdetail.thread_id' => $thread_id
-			)
-		));
+		$messagesdetails = $this->Messagesdetail->getMessagesdetailsByThreadId($thread_id);
+
+		$messagesitemsController = new MessagesitemsController();
+
+		$messagesitems = $messagesitemsController->Messagesitem->getMessagesitemsByThreadId($thread_id);
 
 		$this->set('messagesdetails', $messagesdetails);
+
+		$this->set('messagesitems', $messagesitems);
+		
+		$this->set('loggedInUserDetails', $this->Auth->user());
+	}*/
+
+	public function view($thread_id){
+
+		$messagesdetails = $this->Messagesdetail->getMessagesdetailsByThreadId($thread_id);
+
+		$messagesitemsController = new MessagesitemsController();
+
+		$messagesitems = $messagesitemsController->Messagesitem->getMessagesitemsByThreadId($thread_id);
+
+		$this->set('messagesdetails', $messagesdetails);
+
+		$this->set('messagesitems', $messagesitems);
+		
+		$this->set('loggedInUserDetails', $this->Auth->user());
+
+	}
+
+	public function view_ajax_show_more(){
+		if ($this->request->is('ajax')) {
+			$page = $this->request->query('page') ? $this->request->query('page') : 1;
+			$thread_id = $this->request->query('thread_id'); // Assuming thread_id is passed as a query parameter
+	
+			$this->autoRender = false; // Disable CakePHP rendering to avoid additional output
+	
+			// Load the Messagesitem model
+			$this->loadModel('Messagesitem');
+	
+			// Set pagination parameters
+			$this->paginate = array(
+				'conditions' => array('Messagesitem.thread_id' => $thread_id),
+				'limit' => 10,
+				'page' => $page,
+				'order' => array('Messagesitem.created' => 'DESC') // Order by created field, latest to earliest
+			);
+	
+			// Fetch paginated results
+			$paginatedMessagesItems = $this->paginate('Messagesitem');
+	
+			// Return results in JSON format
+			echo json_encode([$paginatedMessagesItems]);
+		}
 	}
 
 	

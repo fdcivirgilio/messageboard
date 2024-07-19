@@ -32,5 +32,38 @@ App::uses('Model', 'Model');
 class Messagesitem extends AppModel {
     public $useTable = 'messages_items';
     public $primaryKey = 'id';
-    
+
+    public function getMessagesitemsByThreadId($thread_id) {
+
+        $conditions = array(
+            'thread_id' => $thread_id,
+        );
+
+        return $this->find('all', 
+        
+            array(
+                'conditions' => $conditions,
+                'joins' => array(
+                    array(
+                        'table' => 'users', // Assuming the table name is 'users'
+                        'alias' => 'User',
+                        'type' => 'INNER',
+                        'conditions' => array(
+                            //'User.id = Messagesitem.user_id'
+                            'Messagesitem.user_id = User.id'
+
+                        )
+                    )
+                ),
+                'fields' => array(
+                    'Messagesitem.*',
+                    'User.name AS sender_name',
+                    'User.profile_picture_id AS sender_profile_picture'
+                ),
+                'limit' => 10,
+                'order' => 'Messagesitem.created DESC' // Example ordering, adjust as needed
+            )
+        );
+    }
+
 }
