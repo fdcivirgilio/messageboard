@@ -68,7 +68,7 @@ class UsersController extends AppController {
         $this->set('user_age', $user_age);
     }
 
-    public function upload_image($data){
+    /*public function upload_image($data){
 
         if(($data['error'] == 0) && ($data['size'] > 0)){
 
@@ -91,6 +91,35 @@ class UsersController extends AppController {
 
         }
         
+    }*/
+
+    public function upload_image($data) {
+        // Define allowed image MIME types and extensions
+        $allowedMimeTypes = array('image/jpeg', 'image/png', 'image/gif', 'image/webp');
+        $allowedExtensions = array('jpg', 'jpeg', 'png', 'gif', 'webp');
+    
+        // Check for upload errors and file size
+        if ($data['error'] == 0 && $data['size'] > 0) {
+            $name = $data['name'];
+            $tmp_name = $data['tmp_name'];
+            $type = $data['type'];
+    
+            // Check MIME type
+            if (in_array($type, $allowedMimeTypes)) {
+                // Check file extension
+                $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                if (in_array($ext, $allowedExtensions)) {
+                    // Generate a unique filename
+                    $filename = uniqid() . '.' . $ext;
+                    $filePath = WWW_ROOT . 'img' . DS . 'profile_pictures' . DS . $filename;
+    
+                    // Move the uploaded file to the destination
+                    if (move_uploaded_file($tmp_name, $filePath)) {
+                        return $filename;
+                    } 
+                } 
+            } 
+        } 
     }
 
     public function update($user_id, $user_array) {
