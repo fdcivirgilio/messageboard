@@ -16,36 +16,79 @@
     var profile_picture = "<?php echo $User->get_profile_picture_url_by_image_name($loggedInUserDetails['profile_picture_id']) ?>";
 
     var thread_id = "<?php echo $messagesdetails['0']['Messagesdetail']['thread_id'] ?>";
-    function html_message_item(profile_picture, message_content, created){
+    
+    function html_message_item(profile_picture, message_content, created, sender_user_id, message_id){
 
-    return `
+        if(sender_user_id == <?php echo $user_id; ?>){
 
-        <div class="d-block container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary position-relative" style="height: 100px">
+            return `
 
-            <div class="details col-11 ps-2 bg-light position-relative order-1 py-2 rounded">
+                <div class="message-item d-block container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary position-relative" style="height: 100px">
+                    
+                    <button 
+                        class = "delete-messageitem btn btn-danger" 
+                        style = "z-index: 10000"
+                        data-message-id = "` + message_id + `"
+                    >Delete Message</button> 
 
-                <div class="message-item">
+                    <div class="details col-11 ps-2 bg-light position-relative order-1 py-2 rounded">
 
-                    ` + message_content + `
+                        <div class="message-item">
+
+                            ` + message_content + `
+                        </div>
+
+                        <div class="created text-start position-absolute bottom-0 start-0 end-0">
+
+                            <span class="badge text-secondary py-1">` + created + `</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="profile-picture col-1 overflow-hidden bg-light text-center order-2 py-2">
+
+                        <img src="` + profile_picture + `" alt="" class="h-100 p-1">
+
+                    </div>
+
                 </div>
 
-                <div class="created text-start position-absolute bottom-0 start-0 end-0">
+            `;
 
-                    <span class="badge text-secondary py-1">` + created + `</span>
+        }
+
+        return `
+
+            <div class="d-block container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary position-relative" style="height: 100px">
+
+                <div class="details col-11 ps-2 bg-light position-relative order-2 py-2 rounded">
+
+                    <div class="message-item">
+
+                        ` + message_content + `
+                    </div>
+
+                    <div class="created text-start position-absolute bottom-0 start-0 end-0">
+
+                        <span class="badge text-secondary py-1">` + created + `</span>
+
+                    </div>
+
+                </div>
+
+                <div class="profile-picture col-1 overflow-hidden bg-light text-center order-1 py-2">
+
+                    <img src="` + profile_picture + `" alt="" class="h-100 p-1">
 
                 </div>
 
             </div>
 
-            <div class="profile-picture col-1 overflow-hidden bg-light text-center order-2 py-2">
+        `;
 
-                <img src="` + profile_picture + `" alt="" class="h-100 p-1">
 
-            </div>
-
-        </div>
-
-    `;
+        
 
     }
 
@@ -64,11 +107,11 @@
 
                 <div class="profile-picture col-1 overflow-hidden bg-light text-center order-1 py-2">
 
-                <img 
-                    src="<?php echo $profile_picture; ?>" 
-                    alt="" 
-                    class = "h-100 p-1"
-                >
+                    <img 
+                        src="<?php echo $profile_picture; ?>" 
+                        alt="" 
+                        class = "h-100 p-1"
+                    >
 
                 </div>
 
@@ -97,13 +140,13 @@
 
             ?>
 
-                <div class="profile-picture col-1 overflow-hidden bg-light text-center order-2  py-2">
+                <div class="profile-picture col-1 overflow-hidden bg-light text-center order-2 py-2">
 
-                <img 
-                    src="<?php echo $profile_picture; ?>" 
-                    alt="" 
-                    class = "h-100 p-1"
-                >
+                    <img 
+                        src="<?php echo $profile_picture; ?>" 
+                        alt="" 
+                        class = "h-100 p-1"
+                    >
 
                 </div>
 
@@ -215,9 +258,14 @@
 
                             ?>
                                 <div 
-                                    class = "d-block container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary position-relative" 
+                                    class = "message-item d-block container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary position-relative" 
                                     style = "height: 100px"
                                 >
+                                        <button 
+                                            class = "delete-messageitem btn btn-danger" 
+                                            style = "z-index: 10000"
+                                            data-message-id = "<?php echo $message['Messagesitem']['id'] ?>"
+                                        >Delete Message</button> 
 
                                     <?php
 
@@ -299,11 +347,15 @@
                 
                 success: function(response) {
 
-                        let message_content = response['Messagesitem']['content'];
-                        let created = response['Messagesitem']['modified'];
+                    //console.log(response);
 
-                        $('.message-list').prepend(html_message_item(profile_picture, message_content, created));
-                        $("#MessagesitemContent").val('');
+                    let message_content = response['Messagesitem']['content'];
+                    let created = response['Messagesitem']['modified'];
+                    let sender_user_id = <?php echo $user_id; ?>;
+                    let message_id = response['Messagesitem']['id'];
+
+                    $('.message-list').prepend(html_message_item(profile_picture, message_content, created, sender_user_id, message_id));
+                    $("#MessagesitemContent").val('');
 
 
                 },
@@ -323,6 +375,8 @@
                 dataType: 'json', // Expect JSON response from server
                 success: function(response) {
 
+                    console.log(response)
+
                     for(var count = 0; count < response[0].length; count++){
 
                         //alert(response['Messagesitem']['content'])
@@ -331,8 +385,9 @@
                         let show_more_profile_picture = '';
                         let message_content = response[0][count]['Messagesitem']['content'] 
                         let created = response[0][count]['Messagesitem']['created'];
+                        let sender_user_id = response[0][count]['Messagesitem']['user_id'];
 
-                        $('.message-list').append(html_message_item(profile_picture, message_content, created));
+                        $('.message-list').append(html_message_item(profile_picture, message_content, created, sender_user_id));
 
                     }
 
@@ -349,6 +404,36 @@
             });
         });
 
+        $(document).on('click', '.delete-messageitem', function(e) {
+            e.preventDefault();
+            
+            if (confirm('Are you sure you want to delete this item?')) {
+                var button = $(this);
+                var id = button.data('message-id'); // Get the ID from a data attribute
+                
+                $.ajax({
+                    url: '<?php echo Router::url(array('controller' => 'messagesitems', 'action' => 'remove')); ?>?id=' + id,
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function(response) {
+
+                        console.log(response);
+
+                        if(response.status == "success"){
+                            alert("Message deleted successfully.");
+                            button.closest('.message-item').remove();
+                        }
+                        else{
+                            alert("Something went wrong.");
+                        }
+
+                    },
+                    error: function() {
+                        alert('An error occurred while trying to delete the item.');
+                    }
+                });
+            }
+        });
     
     });
 

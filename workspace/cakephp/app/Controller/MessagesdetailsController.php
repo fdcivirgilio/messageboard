@@ -131,21 +131,6 @@ class MessagesdetailsController extends AppController {
 
 	}
 
-	/*public function view($thread_id){
-
-		$messagesdetails = $this->Messagesdetail->getMessagesdetailsByThreadId($thread_id);
-
-		$messagesitemsController = new MessagesitemsController();
-
-		$messagesitems = $messagesitemsController->Messagesitem->getMessagesitemsByThreadId($thread_id);
-
-		$this->set('messagesdetails', $messagesdetails);
-
-		$this->set('messagesitems', $messagesitems);
-		
-		$this->set('loggedInUserDetails', $this->Auth->user());
-	}*/
-
 	public function view($thread_id){
 
 		$messagesdetails = $this->Messagesdetail->getMessagesdetailsByThreadId($thread_id);
@@ -187,6 +172,47 @@ class MessagesdetailsController extends AppController {
 			echo json_encode([$paginatedMessagesItems]);
 		}
 	}
+
+	public function remove() {
+		// Remove a message and related records
+	
+		if ($this->request->is('ajax')) {
+			$this->autoRender = false;
+	
+			$id = $this->request->query('id');
+	
+			// Check if the record exists
+			$message = $this->Messagesdetail->findById($id);
+	
+			if ($message) {
+				// Get the thread ID from the message
+				$threadId = $message['Messagesdetail']['thread_id'];
+
+				//echo json_encode(array($threadId));
+
+	
+				// Delete the message record
+				if ($this->Messagesdetail->delete($id)) {
+					// Initialize the Messagesitem model
+					$this->Messagesitem = ClassRegistry::init('Messagesitem');
+	
+					// Delete related records from Messagesitem based on thread_id
+					$conditions = array('Messagesitem.thread_id' => $threadId);
+					$this->Messagesitem->deleteAll($conditions);
+					
+					// Send success response
+					echo json_encode(array('status' => 'success'));
+				} else {
+					// Send error response if message deletion fails
+					echo json_encode(array('status' => 'error', 'message' => 'Failed to delete message'));
+				}
+			} else {
+				// Send error response if message is not found
+				echo json_encode(array('status' => 'error', 'message' => 'Message not found'));
+			}
+		}
+	}
+
 
 	
 }

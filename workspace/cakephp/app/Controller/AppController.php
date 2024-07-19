@@ -69,7 +69,7 @@ class AppController extends Controller {
         parent::beforeFilter();
 
         // global restriction
-        $this->Auth->allow('view', 'register', 'logout', 'success');
+        $this->Auth->allow('register', 'logout', 'success');
 
         $this->loadModel('User');
 

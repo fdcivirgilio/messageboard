@@ -184,6 +184,8 @@ class MessagesItemsController extends AppController {
 			
 			if ($this->Messagesitem->save($messageitems)) {
 
+				$messageitems['Messagesitem']['id'] = $this->Messagesitem->id;
+
 				echo json_encode($this->Messagesitem->save($messageitems));
 				
 			}
@@ -191,6 +193,32 @@ class MessagesItemsController extends AppController {
 			
         }
 
+	}
+
+	public function remove(){
+
+		//remove a message
+
+		if ($this->request->is('ajax')) {
+
+			$this->autoRender = false;
+
+			$id = $this->request->query('id');
+
+			// Check if the record exists
+			$message = $this->Messagesitem->findById($id);
+
+			if ($message) {
+
+				$this->Messagesitem->delete($id);
+
+				echo json_encode(array('status' => 'success'));
+
+			} else {
+				echo json_encode(array('status' => 'error'));
+			}
+			
+		}
 	}
 
 

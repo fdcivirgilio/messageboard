@@ -34,10 +34,14 @@
 
                     ?>
                         <a 
-                            class = "d-block container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary position-relative" 
+                            class = "message-details container d-flex shadow-sm mb-2 py-2 text-decoration-none text-secondary position-relative" 
                             style = "height: 100px"
                             href = "<?php echo Router::url('/messages/thread/' . $message['Messagesdetail']['thread_id'] . '/', true);	?>"
                         >
+                                <button 
+                                    class="remove-message-thread btn btn-danger me-1"
+                                    data-messagedetails-id="<?php echo $message['Messagesdetail']['id']; ?>"
+                                >Remove Conversation</button>
     
 
                             <div class="profile-picture col-1 overflow-hidden bg-light text-center">
@@ -154,4 +158,36 @@
             });
         });
     });
+
+    $(document).on('click', '.remove-message-thread', function(e) {
+
+            e.preventDefault();
+            
+            if (confirm('Are you sure you want to delete this message thread?')) {
+                var button = $(this);
+                var id = button.data('messagedetails-id'); // Get the ID from a data attribute
+                
+                $.ajax({
+                    url: '<?php echo Router::url(array('controller' => 'messagesdetails', 'action' => 'remove')); ?>?id=' + id,
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function(response) {
+
+                        console.log(response);
+
+                        if(response.status == "success"){
+                            alert("Message thread deleted successfully.");
+                            button.closest('.message-details').remove();
+                        }
+                        else{
+                            alert("Something went wrong.");
+                        }
+
+                    },
+                    error: function() {
+                        alert('An error occurred while trying to delete the item.');
+                    }
+                });
+            }
+        });
 </script>
