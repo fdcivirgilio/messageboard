@@ -110,10 +110,11 @@ class User extends AppModel {
 
     public function update_last_login_time($user_id) {
 
-        $this->User->id = $user_id;
+        $this->id = $user_id;
+        $current_time = date('Y-m-d H:i:s');
     
-        if ($this->User->saveField('last_login_time', date('Y-m-d H:i:s'))) {
-            // Find and return the updated user data
+        if ($this->saveField('last_login_time', $current_time)) {
+
             return $this->User->findById($user_id);
         }
     

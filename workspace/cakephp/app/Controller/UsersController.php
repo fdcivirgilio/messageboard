@@ -277,8 +277,6 @@ class UsersController extends AppController {
                 $LogsController = new LogsController;
                 $LogsController->add($user_id);
     
-                //$this->Flash->success(__($user_id));
-
                 return $this->redirect($this->Auth->redirectUrl());
             }
 

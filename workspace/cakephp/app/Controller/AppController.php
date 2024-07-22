@@ -44,7 +44,7 @@ class AppController extends Controller {
         'Flash',
         'Auth' => array(
             'loginRedirect' => array(
-                'controller' => 'users',
+                'controller' => 'Messagesdetails',
                 'action' => 'index'
             ),
             'logoutRedirect' => array(
@@ -81,9 +81,8 @@ class AppController extends Controller {
         
         $this->set('currentUser_2', $userDetails);
 
-        // Check if the user is already logged in and trying to access the login page
         if ($this->request->params['action'] == 'login' && $this->Auth->user()) {
-            return $this->redirect(['controller' => 'pages', 'action' => 'index']);
+            return $this->redirect(['controller' => 'messagesdetails', 'action' => 'index']);
         }
     }
 }
